@@ -18,7 +18,7 @@ Simple application to reproduce Hibernate bug based on _Hibernate_ and in memory
 
 ## Usage
 
-To run the test, make sure you have Docker running locally and run maven build:
+To run the test, just run maven build:
 ```
     mvn clean verify
 ```
