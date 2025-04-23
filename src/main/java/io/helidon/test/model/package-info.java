@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 /**
- * Hibernate bug reproduction scenario.
+ * Reproduction scenario entity model.
  */
-open module io.helidon.test {
-
-    requires jakarta.persistence;
-
-    exports io.helidon.test.model;
-
-}
+package io.helidon.test.model;

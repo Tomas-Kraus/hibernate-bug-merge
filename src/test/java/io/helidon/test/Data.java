@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.helidon.test.data;
+package io.helidon.test;
 
 import java.util.List;
 import java.util.Map;
@@ -26,14 +26,9 @@ import io.helidon.test.model.Trainer;
 import io.helidon.test.model.Type;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
-public class InitialData {
-
-    private static final System.Logger LOGGER = System.getLogger(InitialData.class.getName());
-
-    private InitialData() {
-        throw new UnsupportedOperationException("No instances of Data are allowed");
-    }
+public class Data {
 
     /**
      * List of {@code Type}s. Array index matches ID.
@@ -59,7 +54,6 @@ public class InitialData {
             new Type(17, "Dark"),
             new Type(18, "Fairy")
     };
-
     /**
      * List of {@code Regions}s. Array index matches ID.
      */
@@ -76,7 +70,6 @@ public class InitialData {
             new Region(9, "Kitakami"),
             new Region(10, "Hoenn")
     };
-
     /**
      * List of {@code League}s. Array index matches ID.
      */
@@ -92,7 +85,6 @@ public class InitialData {
             new League(8, "Paldea League", REGIONS[8]),
             new League(9, "Hoenn League", REGIONS[10]),
     };
-
     /**
      * List of {@code Team}s. Array index matches ID.
      */
@@ -101,7 +93,6 @@ public class InitialData {
             new Team(1, "Kanto"),
             new Team(2, "Johto")
     };
-
     /**
      * List of {@code Keeper}s. Array index matches ID.
      */
@@ -114,7 +105,6 @@ public class InitialData {
             new Trainer(5, "Falkner", TEAMS[2]),
             new Trainer(6, "Whitney", TEAMS[2])
     };
-
     /**
      * List of {@code Pokemons}s. Array index matches ID.
      */
@@ -141,7 +131,6 @@ public class InitialData {
             new Pokemon(19, TRAINERS[6], "Giratina", 268, true, List.of(TYPES[8], TYPES[16])),
             new Pokemon(20, TRAINERS[6], "Regirock", 149, true, List.of(TYPES[6]))
     };
-
     /**
      * Pokemons not stored in the database.
      */
@@ -167,44 +156,32 @@ public class InitialData {
      * @param em JPA {@link jakarta.persistence.EntityManager}
      */
     public static void init(EntityManager em) {
-        LOGGER.log(System.Logger.Level.DEBUG, "Data initialization");
-        for (int i = 1; i < InitialData.TYPES.length; i++) {
-            em.persist(InitialData.TYPES[i]);
+        EntityTransaction et = em.getTransaction();
+        et.begin();
+        try {
+            for (int i = 1; i < TYPES.length; i++) {
+                em.persist(Data.TYPES[i]);
+            }
+            for (int i = 1; i < REGIONS.length; i++) {
+                em.persist(REGIONS[i]);
+            }
+            for (int i = 1; i < LEAGUES.length; i++) {
+                em.persist(LEAGUES[i]);
+            }
+            for (int i = 1; i < TEAMS.length; i++) {
+                em.persist(TEAMS[i]);
+            }
+            for (int i = 1; i < TRAINERS.length; i++) {
+                em.persist(TRAINERS[i]);
+            }
+            for (int i = 1; i < POKEMONS.length; i++) {
+                em.persist(POKEMONS[i]);
+            }
+            et.commit();
+        } catch (Throwable t) {
+            et.rollback();
+            throw t;
         }
-        for (int i = 1; i < InitialData.REGIONS.length; i++) {
-            em.persist(InitialData.REGIONS[i]);
-        }
-        for (int i = 1; i < InitialData.LEAGUES.length; i++) {
-            em.persist(InitialData.LEAGUES[i]);
-        }
-        for (int i = 1; i < InitialData.TEAMS.length; i++) {
-            em.persist(InitialData.TEAMS[i]);
-        }
-        for (int i = 1; i < InitialData.TRAINERS.length; i++) {
-            em.persist(InitialData.TRAINERS[i]);
-        }
-        for (int i = 1; i < InitialData.POKEMONS.length; i++) {
-            em.persist(InitialData.POKEMONS[i]);
-        }
-    }
-
-    /**
-     * Verify database data
-     */
-    public static void verify(EntityManager em) {
-        LOGGER.log(System.Logger.Level.DEBUG, "Data verification");
-        List<Pokemon> pokemons = em.createQuery("SELECT p FROM Pokemon p", Pokemon.class)
-                .getResultList();
-        LOGGER.log(System.Logger.Level.DEBUG, String.format(" - pokemons: %d", pokemons.size()));
-    }
-
-    /**
-     * Delete temporary data.
-     *
-     * @param em JPA {@link jakarta.persistence.EntityManager}
-     */
-    public static void deleteTemp(EntityManager em) {
-        em.createNamedQuery("Pokemon.deleteTemp").executeUpdate();
     }
 
 }
